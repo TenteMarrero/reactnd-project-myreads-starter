@@ -6,8 +6,11 @@ import SearchBooks from './SearchBooks'
 import ListBooks from './ListBooks'
 
 class BooksApp extends Component {
-  state = {
-    books: []
+  constructor(props) {
+    super(props)
+    this.state = {
+      books: []
+    }
   }
 
   componentDidMount() {
@@ -17,12 +20,13 @@ class BooksApp extends Component {
   }
 
   updateBookShelf = (book, shelf) => {
-    if (shelf && shelf !== 'none') {
-      this._changeBookShelf(book, shelf)
-    } else {
-      this._unlistBook(book)
-    }
-    BooksAPI.update(book, shelf)
+    BooksAPI.update(book, shelf).then(() => {
+      if (shelf && shelf !== 'none') {
+        this._changeBookShelf(book, shelf)
+      } else {
+        this._unlistBook(book)
+      }
+    })
   }
 
   _changeBookShelf = (book, shelf) => {
@@ -42,13 +46,14 @@ class BooksApp extends Component {
     }))
   }
 
-  createBook = (book, shelf) => {
+  addBook = (book, shelf) => {
     if (shelf !== 'none') {
       book.shelf = shelf
-      this.setState((state) => ({
-        books: state.books.concat([book])
-      }))
-      BooksAPI.update(book, shelf)
+      BooksAPI.update(book, shelf).then(() => {
+        this.setState((state) => ({
+          books: state.books.concat([book])
+        }))
+      })
     }
   }
 
@@ -61,7 +66,7 @@ class BooksApp extends Component {
         <Route path='/search' render={({ history }) => (
           <SearchBooks
             existingBooks={this.state.books}
-            updateBookInShelf={this.createBook}
+            updateBookInShelf={this.addBook}
           />
         )} />
       </div>
